@@ -33,8 +33,7 @@ def startScanning():
         path = "dataset/realsense/scan"
         scan_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
         print("Starting scan, instance " + str(scan_count) + "...")
-        result = subprocess.run(['python', 'sensors/realsense_recorder.py', '--record_imgs'], capture_output=True, text=True)
-        print(result.stdout)
+        subprocess.run(['python', 'sensors/realsense_recorder.py', '--record_imgs'], capture_output=True, text=True)        
     else:
         print("No camera is detected")
 
@@ -76,8 +75,8 @@ def makeFragment():
     scan_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
     if(scan_count > 0):
         print("Making fragment...")
-        result = subprocess.run(['python', 'run_system.py', 'config/realsense.json', '--make'], capture_output=True, text=True)
-        print(result.stdout)
+        subprocess.run(['python', 'run_system.py', 'config/realsense.json', '--make'], capture_output=True, text=True)
+        
         integrateScene()
     else:
         print("No scannings are made yet, please start scanning first")
