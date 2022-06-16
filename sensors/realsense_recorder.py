@@ -97,7 +97,7 @@ if __name__ == "__main__":
         description=
         "Realsense Recorder. Please select one of the optional arguments")
     parser.add_argument("--output_folder",
-                        default='../dataset/realsense/',
+                        default='dataset/realsense/',
                         help="set output folder")
     parser.add_argument("--record_rosbag",
                         action='store_true',
@@ -118,10 +118,14 @@ if __name__ == "__main__":
     path_output = args.output_folder
     path_depth = join(args.output_folder, "depth")
     path_color = join(args.output_folder, "color")
+
+    #add scan folder to record scan value
+    path_scan = join(args.output_folder, "scan")
     if args.record_imgs:
         make_clean_folder(path_output)
         make_clean_folder(path_depth)
-        make_clean_folder(path_color)
+        make_clean_folder(path_color)#add scan folder
+        make_clean_folder(path_scan)
 
     path_bag = join(args.output_folder, "realsense.bag")
     if args.record_rosbag:
@@ -139,124 +143,131 @@ if __name__ == "__main__":
 
     color_profiles, depth_profiles = get_profiles()
 
-    if args.record_imgs or args.record_rosbag:
-        # note: using 640 x 480 depth resolution produces smooth depth boundaries
-        #       using rs.format.bgr8 for color image format for OpenCV based image visualization
-        print('Using the default profiles: \n  color:{}, depth:{}'.format(
-            color_profiles[0], depth_profiles[0]))
-        w, h, fps, fmt = depth_profiles[0]
-        config.enable_stream(rs.stream.depth, w, h, fmt, fps)
-        w, h, fps, fmt = color_profiles[0]
-        config.enable_stream(rs.stream.color, w, h, fmt, fps)
-        if args.record_rosbag:
-            config.enable_record_to_file(path_bag)
-    if args.playback_rosbag:
-        config.enable_device_from_file(path_bag, repeat_playback=True)
+    #if camera is plugged in (color_profiles and depth_profiles are not)
+    if not color_profiles and depth_profiles:
+        if args.record_imgs or args.record_rosbag:
+            # note: using 640 x 480 depth resolution produces smooth depth boundaries
+            #       using rs.format.bgr8 for color image format for OpenCV based image visualization
+            print('Using the default profiles: \n  color:{}, depth:{}'.format(
+                color_profiles[0], depth_profiles[0]))
+            w, h, fps, fmt = depth_profiles[0]
+            config.enable_stream(rs.stream.depth, w, h, fmt, fps)
+            w, h, fps, fmt = color_profiles[0]
+            config.enable_stream(rs.stream.color, w, h, fmt, fps)
+            if args.record_rosbag:
+                config.enable_record_to_file(path_bag)
+        if args.playback_rosbag:
+            config.enable_device_from_file(path_bag, repeat_playback=True)
 
-    # Start streaming
-    profile = pipeline.start(config)
-    depth_sensor = profile.get_device().first_depth_sensor()
+        # Start streaming
+        profile = pipeline.start(config)
+        depth_sensor = profile.get_device().first_depth_sensor()
 
-    # Using preset HighAccuracy for recording
-    if args.record_rosbag or args.record_imgs:
-        depth_sensor.set_option(rs.option.visual_preset, Preset.HighAccuracy)
+        # Using preset HighAccuracy for recording
+        if args.record_rosbag or args.record_imgs:
+            depth_sensor.set_option(rs.option.visual_preset, Preset.HighAccuracy)
 
-    # Getting the depth sensor's depth scale (see rs-align example for explanation)
-    depth_scale = depth_sensor.get_depth_scale()
+        # Getting the depth sensor's depth scale (see rs-align example for explanation)
+        depth_scale = depth_sensor.get_depth_scale()
 
-    # We will not display the background of objects more than
-    #  clipping_distance_in_meters meters away
-    clipping_distance_in_meters = 3  # 3 meter
-    clipping_distance = clipping_distance_in_meters / depth_scale
+        # We will not display the background of objects more than
+        #  clipping_distance_in_meters meters away
+        clipping_distance_in_meters = 3  # 3 meter
+        clipping_distance = clipping_distance_in_meters / depth_scale
 
-    # Create an align object
-    # rs.align allows us to perform alignment of depth frames to others frames
-    # The "align_to" is the stream type to which we plan to align depth frames.
-    align_to = rs.stream.color
-    align = rs.align(align_to)
+        # Create an align object
+        # rs.align allows us to perform alignment of depth frames to others frames
+        # The "align_to" is the stream type to which we plan to align depth frames.
+        align_to = rs.stream.color
+        align = rs.align(align_to)
 
-    # Streaming loop
-    path = 'dataset/realsense/color'
-    frame_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
-    if (0 <= frame_count < 10):
-        start_frame = "00000" + str(frame_count)
-    elif (10 <= frame_count < 100):
-        start_frame = "0000" + str(frame_count)
-    elif (100 <= frame_count < 1000):
-        start_frame = "000" + str(frame_count)
-    elif (1000 <= frame_count < 10000):
-        start_frame = "00" + str(frame_count)
-    elif (10000 <= frame_count < 100000):
-        start_frame = "0" + str(frame_count)
-    elif (100000 <= frame_count <= 999999):
-        start_frame = str(frame_count)
-    #frame_count = 0
-    try:
-        while True:
-            # Get frameset of color and depth
-            frames = pipeline.wait_for_frames()
+        # Streaming loop
+        path = 'dataset\realsense\color'
+        # current_path = os.path.join(os.getcwd(), path)
+        frame_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
+        if (0 <= frame_count < 10):
+            start_frame = "00000" + str(frame_count)
+        elif (10 <= frame_count < 100):
+            start_frame = "0000" + str(frame_count)
+        elif (100 <= frame_count < 1000):
+            start_frame = "000" + str(frame_count)
+        elif (1000 <= frame_count < 10000):
+            start_frame = "00" + str(frame_count)
+        elif (10000 <= frame_count < 100000):
+            start_frame = "0" + str(frame_count)
+        elif (100000 <= frame_count <= 999999):
+            start_frame = str(frame_count)
+        #frame_count = 0
+        try:
+            while True:
+                # Get frameset of color and depth
+                frames = pipeline.wait_for_frames()
 
-            # Align the depth frame to color frame
-            aligned_frames = align.process(frames)
+                # Align the depth frame to color frame
+                aligned_frames = align.process(frames)
 
-            # Get aligned frames
-            aligned_depth_frame = aligned_frames.get_depth_frame()
-            color_frame = aligned_frames.get_color_frame()
+                # Get aligned frames
+                aligned_depth_frame = aligned_frames.get_depth_frame()
+                color_frame = aligned_frames.get_color_frame()
 
-            # Validate that both frames are valid
-            if not aligned_depth_frame or not color_frame:
-                continue
+                # Validate that both frames are valid
+                if not aligned_depth_frame or not color_frame:
+                    continue
 
-            depth_image = np.asanyarray(aligned_depth_frame.get_data())
-            color_image = np.asanyarray(color_frame.get_data())
+                depth_image = np.asanyarray(aligned_depth_frame.get_data())
+                color_image = np.asanyarray(color_frame.get_data())
 
-            if args.record_imgs:
-                if frame_count == 0:
-                    save_intrinsic_as_json(
-                        join(args.output_folder, "camera_intrinsic.json"),
-                        color_frame)
-                cv2.imwrite("%s/%06d.png" % \
-                        ('dataset/realsense/depth', frame_count), depth_image)
-                cv2.imwrite("%s/%06d.jpg" % \
-                        ('dataset/realsense/color', frame_count), color_image)
-                print("Saved color + depth image %06d" % frame_count)
-                frame_count += 1
+                if args.record_imgs:
+                    if frame_count == 0:
+                        save_intrinsic_as_json(
+                            join(args.output_folder, "camera_intrinsic.json"),
+                            color_frame)
+                    cv2.imwrite("%s/%06d.png" % \
+                            ('dataset/realsense/depth', frame_count), depth_image)
+                    cv2.imwrite("%s/%06d.jpg" % \
+                            ('dataset/realsense/color', frame_count), color_image)
+                    print("Saved color + depth image %06d" % frame_count)
+                    frame_count += 1
 
-            # Remove background - Set pixels further than clipping_distance to grey
-            grey_color = 153
-            #depth image is 1 channel, color is 3 channels
-            depth_image_3d = np.dstack((depth_image, depth_image, depth_image))
-            bg_removed = np.where((depth_image_3d > clipping_distance) | \
-                    (depth_image_3d <= 0), grey_color, color_image)
+                # Remove background - Set pixels further than clipping_distance to grey
+                grey_color = 153
+                #depth image is 1 channel, color is 3 channels
+                depth_image_3d = np.dstack((depth_image, depth_image, depth_image))
+                bg_removed = np.where((depth_image_3d > clipping_distance) | \
+                        (depth_image_3d <= 0), grey_color, color_image)
 
-            # Render images
-            depth_colormap = cv2.applyColorMap(
-                cv2.convertScaleAbs(depth_image, alpha=0.09), cv2.COLORMAP_JET)
-            images = np.hstack((bg_removed, depth_colormap))
-            cv2.namedWindow('Recorder Realsense', cv2.WINDOW_AUTOSIZE)
-            cv2.imshow('Recorder Realsense', images)
-            key = cv2.waitKey(1)
+                # Render images
+                depth_colormap = cv2.applyColorMap(
+                    cv2.convertScaleAbs(depth_image, alpha=0.09), cv2.COLORMAP_JET)
+                images = np.hstack((bg_removed, depth_colormap))
+                cv2.namedWindow('Recorder Realsense', cv2.WINDOW_AUTOSIZE)
+                cv2.imshow('Recorder Realsense', images)
+                key = cv2.waitKey(1)
 
-            # if 'esc' button pressed, escape loop and exit program
-            if key == 27:
-                if (0 <= frame_count < 10):
-                    end_frame = "00000" + str(frame_count)
-                elif (10 <= frame_count < 100):
-                    end_frame = "0000" + str(frame_count)
-                elif (100 <= frame_count < 1000):
-                    end_frame = "000" + str(frame_count)
-                elif (1000 <= frame_count < 10000):
-                    end_frame = "00" + str(frame_count)
-                elif (10000 <= frame_count < 100000):
-                    end_frame = "0" + str(frame_count)
-                elif (100000 <= frame_count <= 999999):
-                    end_frame = str(frame_count)
-                path = "dataset/realsense/scan"
-                scan_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
-                text_file = open("dataset/realsense/scan/scan" + str(scan_count) + ".txt", "w")
-                text_file.write((start_frame) + "\n" + (end_frame))
-                text_file.close()
-                cv2.destroyAllWindows()
-                break
-    finally:
-        pipeline.stop()
+                # if 'esc' button pressed, escape loop and exit program
+                if key == 27 or cv2.getWindowProperty('Recorder Realsense', cv2.WND_PROP_AUTOSIZE) < 0:
+                    if (0 <= frame_count < 10):
+                        end_frame = "00000" + str(frame_count)
+                    elif (10 <= frame_count < 100):
+                        end_frame = "0000" + str(frame_count)
+                    elif (100 <= frame_count < 1000):
+                        end_frame = "000" + str(frame_count)
+                    elif (1000 <= frame_count < 10000):
+                        end_frame = "00" + str(frame_count)
+                    elif (10000 <= frame_count < 100000):
+                        end_frame = "0" + str(frame_count)
+                    elif (100000 <= frame_count <= 999999):
+                        end_frame = str(frame_count)
+                    path = "dataset/realsense/scan"
+                    
+                    scan_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
+                    text_file = open("dataset/realsense/scan/scan" + str(scan_count) + ".txt", "w")
+                    text_file.write((start_frame) + "\n" + (end_frame))
+                    text_file.close()
+                    cv2.destroyAllWindows()
+                    break
+        finally:
+            pipeline.stop()
+
+    else:
+        print("Intel realsense camera is not plugged in")
