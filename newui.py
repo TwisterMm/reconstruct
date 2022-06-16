@@ -33,9 +33,9 @@ class UiApp:
             exportselection="true", takefocus=True, validate="none"
         )
         _text_ = """File Path"""
-        self.filepathEntry.delete("0", "end")
-        self.filepathEntry.insert("0", _text_)
-        self.filepathEntry.place(anchor="nw", relx="0.49", rely="0.8", x="0", y="0")
+        # self.filepathEntry.delete("0", "end")
+        # self.filepathEntry.insert("0", _text_)
+        # self.filepathEntry.place(anchor="nw", relx="0.49", rely="0.8", x="0", y="0")
         self.buttonBrowse = tk.Button(self.frame1)
         self.buttonBrowse.configure(
             anchor="n", compound="left", font="TkDefaultFont", justify="right"
@@ -72,12 +72,10 @@ class UiApp:
         subprocess.run(['python', 'sensors/realsense_recorder.py', '--record_imgs'], text=True, stdout=True) 
 
     def integrateScene(self):
-        path = "/dataset/realsense/scan"
-        files = next(os.walk(path))[2]
-        scan_count = len(files)
-        # scan_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
-        # print("Integrating...")
-        subprocess.run(['python', 'run_system.py', 'config/realsense.json', '--register', '--refine', '--integrate'],stdout=True, text=True)
+        path = "dataset/realsense/scan"        
+        scan_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
+        print("Integrating...")
+        subprocess.run(['python', 'run_system.py', 'config/realsense.json', '--make', '--register', '--refine', '--integrate'], stdout=True, text=True)
         old_name = os.path.join("dataset/realsense/scene","integrated.ply")
         new_name = os.path.join("dataset/realsense/scene", "integrated" + str(scan_count-1) + ".ply")
         os.rename(old_name,new_name)
@@ -91,48 +89,42 @@ class UiApp:
         pcd_read = o3d.io.read_point_cloud(ply_name)
         o3d.visualization.draw(pcd_read)
 
-    def deleteLastScan(self):
-        #check file path exist
-        #make file path if not exist
+    def deleteLastScan(self):        
         path = "dataset/realsense/scan"
-        if not exists(path):
-            makedirs(path)
-        scan_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
+        if exists(path):            
+            scan_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
+            if(scan_count > 0):           
+                read_file = open(f"dataset/realsense/scan/scan{scan_count - 1}.txt", "r")
+                lines = read_file.readlines()
+                start_frame = lines[0].split()[0]
+                end_frame = lines[1].split()[0]
+                read_file.close()
+            
+                toDelete = int(end_frame) - int(start_frame)                
+                current_image_num = int(start_frame)
+                for _ in range(toDelete):              
+                    try:
+                        delete_image_name = str(current_image_num).zfill(6)            
+                        os.remove("dataset/realsense/depth/" + delete_image_name + ".png")
+                        os.remove("dataset/realsense/color/" + delete_image_name + ".jpg")
+                        current_image_num += 1 
+                    except FileNotFoundError:
+                        continue
 
-        # read latest file number
-
-        # 
-        if (scan_count >0):
-            read_file = open("dataset/realsense/scan/scan" + str(scan_count - 1) + ".txt", "r")
-            lines = read_file.readlines()
-            start_frame = lines[0][0] + lines[0][1] + lines[0][2]+ lines[0][3] + lines[0][4] +lines[0][5]
-            end_frame = lines[1][0] + lines[1][1] + lines[1][2] + lines[1][3] + lines[1][4] + lines[1][5]
-            read_file.close()
-        
-            toDelete = int(end_frame) - int(start_frame)
-            for x in range(0,toDelete):
-                currentDepth = int(start_frame) + x
-                if (0 <= currentDepth < 10):
-                    deleteDepth = "00000" + str(currentDepth)
-                elif (10 <= currentDepth < 100):
-                    deleteDepth = "0000" + str(currentDepth)
-                elif (100 <= currentDepth < 1000):
-                    deleteDepth = "000" + str(currentDepth)
-                elif (1000 <= currentDepth < 10000):
-                    deleteDepth = "00" + str(currentDepth)
-                elif (10000 <= currentDepth < 100000):
-                    deleteDepth = "0" + str(currentDepth)
-                elif (100000 <= currentDepth <= 999999):
-                    deleteDepth = str(currentDepth)
-                os.remove("dataset/realsense/depth/" + deleteDepth + ".png")
-                os.remove("dataset/realsense/color/" + deleteDepth + ".jpg")
-            os.remove("dataset/realsense/scan/scan" + str(scan_count-1) + ".txt")
-            print("Scan" + str(scan_count-1) + " deleted...")
-            if (os.path.exists("dataset/realsense/scene/integrated" + str(scan_count-1) + ".ply")):
-                os.remove("dataset/realsense/scene/integrated" + str(scan_count-1) + ".ply")
-                print("Scene" + str(scan_count-1) + " deleted...")
-        else:
-            print("No scan found, nothing is deleted")
+                
+                os.remove("dataset/realsense/scan/scan" + str(scan_count-1) + ".txt")
+                print(f"Scan{scan_count-1} deleted...")
+                print(f"Delete from {start_frame} to {end_frame}")
+                
+                try:
+                    os.remove("dataset/realsense/scene/integrated" + str(scan_count-1) + ".ply")
+                    print("Scene" + str(scan_count-1) + " deleted...")
+                except FileNotFoundError:
+                    print("Integrated file not found")
+            else:
+                print("No scan found, nothing is deleted")
+                
+            
 
 if __name__ == "__main__":
     app = UiApp()
