@@ -91,6 +91,7 @@ def save_intrinsic_as_json(filename, frame):
             indent=4)
 
 
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
@@ -144,7 +145,7 @@ if __name__ == "__main__":
     color_profiles, depth_profiles = get_profiles()
 
     #if camera is plugged in (color_profiles and depth_profiles are not)
-    if not color_profiles and depth_profiles:
+    if color_profiles and depth_profiles:
         if args.record_imgs or args.record_rosbag:
             # note: using 640 x 480 depth resolution produces smooth depth boundaries
             #       using rs.format.bgr8 for color image format for OpenCV based image visualization
@@ -182,22 +183,11 @@ if __name__ == "__main__":
         align = rs.align(align_to)
 
         # Streaming loop
-        path = 'dataset\realsense\color'
+        path = 'dataset/realsense/color'
         # current_path = os.path.join(os.getcwd(), path)
         frame_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
-        if (0 <= frame_count < 10):
-            start_frame = "00000" + str(frame_count)
-        elif (10 <= frame_count < 100):
-            start_frame = "0000" + str(frame_count)
-        elif (100 <= frame_count < 1000):
-            start_frame = "000" + str(frame_count)
-        elif (1000 <= frame_count < 10000):
-            start_frame = "00" + str(frame_count)
-        elif (10000 <= frame_count < 100000):
-            start_frame = "0" + str(frame_count)
-        elif (100000 <= frame_count <= 999999):
-            start_frame = str(frame_count)
-        #frame_count = 0
+        start_frame = str(frame_count).zfill(6)        
+        
         try:
             while True:
                 # Get frameset of color and depth
@@ -245,22 +235,10 @@ if __name__ == "__main__":
                 key = cv2.waitKey(1)
 
                 # if 'esc' button pressed, escape loop and exit program
-                if key == 27 or cv2.getWindowProperty('Recorder Realsense', cv2.WND_PROP_AUTOSIZE) < 0:
-                    if (0 <= frame_count < 10):
-                        end_frame = "00000" + str(frame_count)
-                    elif (10 <= frame_count < 100):
-                        end_frame = "0000" + str(frame_count)
-                    elif (100 <= frame_count < 1000):
-                        end_frame = "000" + str(frame_count)
-                    elif (1000 <= frame_count < 10000):
-                        end_frame = "00" + str(frame_count)
-                    elif (10000 <= frame_count < 100000):
-                        end_frame = "0" + str(frame_count)
-                    elif (100000 <= frame_count <= 999999):
-                        end_frame = str(frame_count)
-                    path = "dataset/realsense/scan"
-                    
+                if key == 27 or cv2.getWindowProperty('Recorder Realsense', cv2.WND_PROP_VISIBLE) < 1:                    
+                    path = "dataset/realsense/scan"                   
                     scan_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
+                    end_frame = str(frame_count).zfill(6)
                     text_file = open("dataset/realsense/scan/scan" + str(scan_count) + ".txt", "w")
                     text_file.write((start_frame) + "\n" + (end_frame))
                     text_file.close()
