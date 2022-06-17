@@ -3,6 +3,8 @@ import os
 import subprocess
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
+from tkinter.messagebox import showinfo, showerror
+from sensors.realsense_helper import get_profiles
 
 import open3d as o3d
 from os import makedirs
@@ -68,8 +70,13 @@ class UiApp:
     def run(self):
         self.mainwindow.mainloop()
 
-    def startScanning(self):
-        subprocess.run(['python', 'sensors/realsense_recorder.py', '--record_imgs'], text=True, stdout=True) 
+    def startScanning(self):        
+        showinfo(title="Start Scanning", message="Please connect intel realsense device, scanning will start taking images")
+        colour_frames, depth_frames = get_profiles()
+        if colour_frames and depth_frames:
+            subprocess.run(['python', 'sensors/realsense_recorder.py', '--record_imgs'], text=True, stdout=True) 
+        else:
+            showerror(title="Camera not available", message="Please connect intel realsense device before proceed")
 
     def integrateScene(self):
         path = "dataset/realsense/scan"        
