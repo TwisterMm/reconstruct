@@ -1,4 +1,4 @@
-from tkinter import Tk, Label, Button 
+from tkinter import Tk, Label, Button, Menu
 import os
 import open3d as o3d
 from os.path import exists
@@ -79,7 +79,19 @@ if __name__ == "__main__":
     root.configure(background='#F0F8FF')
     root.title('3D room scanning')
 
+    menubar = Menu(root, background='#F0F8FF', foreground='black', activebackground='white', activeforeground='black')  
+    about = Menu(menubar, tearoff=0, background='#F0F8FF', foreground='black')  
+    about.add_command(label="Program Info")      
+    about.add_command(label="Exit", command=root.quit)  
+    menubar.add_cascade(label="About", menu=about) 
 
+
+    view = Menu(menubar, tearoff=0)
+    ratio = Menu(view, tearoff=0)
+    for aspected_ratio in ('4:3', '16:9'):
+        ratio.add_command(label=aspected_ratio)
+    view.add_cascade(label='Ratio', menu=ratio)
+    view.add_cascade(label='View', menu=view)
 
     # pipeline
     Label(root, text='Pipeline', bg='#F0F8FF', font=('Times', 14, 'bold')).place(x=20, y=4)
@@ -93,6 +105,9 @@ if __name__ == "__main__":
 
     Button(root, text='Browse', bg='#AEEEEE', font=('arial', 12, 'normal'), command=btnBrowse).place(x=50, y=164)
 
-    Button(root, text='Exit', bg='#FF4C4C', width=5, height=2, font=('arial', 12, 'normal'), command=root.destroy).place(x=310, y=164)
+    Button(root, text='Exit', bg='#FF4C4C', width=5, height=2, font=('arial', 12, 'normal'), command=root.quit).place(x=310, y=164)
 
+
+    # drawing the widgets
+    root.config(menu=menubar)
     root.mainloop()
