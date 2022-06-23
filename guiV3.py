@@ -86,12 +86,7 @@ if __name__ == "__main__":
     menubar.add_cascade(label="About", menu=about) 
 
 
-    view = Menu(menubar, tearoff=0)
-    ratio = Menu(view, tearoff=0)
-    for aspected_ratio in ('4:3', '16:9'):
-        ratio.add_command(label=aspected_ratio)
-    view.add_cascade(label='Ratio', menu=ratio)
-    view.add_cascade(label='View', menu=view)
+    
 
     # pipeline
     Label(root, text='Pipeline', bg='#F0F8FF', font=('Times', 14, 'bold')).place(x=20, y=4)
