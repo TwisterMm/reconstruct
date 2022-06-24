@@ -66,9 +66,10 @@ def btnDelete():
                     
 
 def btnBrowse():
-        ply_name = askopenfilename(title = "Select file",filetypes = (("PLY Files","*.ply"),))     
-        pcd_read = o3d.io.read_point_cloud(ply_name)
-        o3d.visualization.draw(pcd_read)
+        ply_name = askopenfilename(title = "Select file",filetypes = (("PLY Files","*.ply"),))
+        if ply_name:
+            pcd_read = o3d.io.read_point_cloud(ply_name)
+            o3d.visualization.draw(pcd_read)
 
 
 if __name__ == "__main__":
