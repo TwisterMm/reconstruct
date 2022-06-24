@@ -38,10 +38,10 @@ if __name__ == '__main__':
 
     # colorizer = rs.colorizer()
     n = 0
-    # Getting the depth sensor's depth scale (see rs-align example for explanation)
-    depth_sensor = profile.get_device().first_depth_sensor()
-    depth_scale = depth_sensor.get_depth_scale()
-    print("Depth Scale is: " , depth_scale)
+    # # Getting the depth sensor's depth scale (see rs-align example for explanation)
+    # depth_sensor = profile.get_device().first_depth_sensor()
+    # depth_scale = depth_sensor.get_depth_scale()
+    # print("Depth Scale is: " , depth_scale)
 
     #FROM ALIGN
     align_to = rs.stream.color
@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
             
                 
-            if key in (27, ord("q")) or cv2.getWindowProperty('RealSense', cv2.WND_PROP_AUTOSIZE) < 0: 
+            if key in (27, ord("q")) or cv2.getWindowProperty('RealSense', cv2.WND_PROP_VISIBLE) < 1: 
                 cv2.destroyAllWindows()
                 break
             if key == ord("s"):
