@@ -8,6 +8,8 @@ from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showinfo, showerror
 from sensors.realsense_helper import get_profiles
 
+import capture
+
 
 def btnCapture():
     showinfo(title="Start Scanning",
@@ -86,7 +88,19 @@ def btnBrowse():
     if ply_name:
         pcd_read = o3d.io.read_point_cloud(ply_name)
         o3d.visualization.draw(pcd_read)
+    
 
+def startViewer():
+    try:
+        os.system('python capture.py')
+    except RuntimeError:
+        pass
+
+
+
+def aboutInfo():
+    showinfo(title="About",
+             message="Prototype version V3.0.0\n3D room scanning based on open3D reconstruction system")
 
 if __name__ == "__main__":
     root = Tk()
@@ -99,9 +113,13 @@ if __name__ == "__main__":
     menubar = Menu(root, background='#F0F8FF', foreground='black',
                    activebackground='white', activeforeground='black')
     about = Menu(menubar, tearoff=0, background='#F0F8FF', foreground='black')
-    about.add_command(label="Program Info")
+    about.add_command(label="Program Info", command=aboutInfo)
     about.add_command(label="Exit", command=root.quit)
     menubar.add_cascade(label="About", menu=about)
+
+    viewer = Menu(menubar, tearoff=0, background='#F0F8FF', foreground='black')
+    viewer.add_command(label="Live Stream Viewer", command=startViewer)
+    menubar.add_cascade(label="Viewer", menu=viewer)
 
     # pipeline
     Label(root, text='Pipeline', bg='#F0F8FF', font=(
@@ -119,6 +137,9 @@ if __name__ == "__main__":
 
     Button(root, text='Browse', bg='#AEEEEE', font=(
         'arial', 12, 'normal'), command=btnBrowse).place(x=50, y=164)
+    
+    Label(root, text='', bg='#F0F8FF', font=(
+        'arial', 12, 'bold')).place(x=20, y=124)
 
     Button(root, text='Exit', bg='#FF4C4C', width=5, height=2, font=(
         'arial', 12, 'normal'), command=root.quit).place(x=310, y=164)
