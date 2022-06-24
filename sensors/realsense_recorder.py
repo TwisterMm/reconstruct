@@ -171,10 +171,10 @@ if __name__ == "__main__":
         # Getting the depth sensor's depth scale (see rs-align example for explanation)
         depth_scale = depth_sensor.get_depth_scale()
 
-        # We will not display the background of objects more than
-        #  clipping_distance_in_meters meters away
-        clipping_distance_in_meters = 3  # 3 meter
-        clipping_distance = clipping_distance_in_meters / depth_scale
+        # # We will not display the background of objects more than
+        # #  clipping_distance_in_meters meters away
+        # clipping_distance_in_meters = 3  # 3 meter
+        # clipping_distance = clipping_distance_in_meters / depth_scale
 
         # Create an align object
         # rs.align allows us to perform alignment of depth frames to others frames
@@ -219,18 +219,32 @@ if __name__ == "__main__":
                     print("Saved color + depth image %06d" % frame_count)
                     frame_count += 1
 
-                # Remove background - Set pixels further than clipping_distance to grey
-                grey_color = 153
-                #depth image is 1 channel, color is 3 channels
-                depth_image_3d = np.dstack((depth_image, depth_image, depth_image))
-                bg_removed = np.where((depth_image_3d > clipping_distance) | \
-                        (depth_image_3d <= 0), grey_color, color_image)
+                # # Remove background - Set pixels further than clipping_distance to grey
+                # grey_color = 153
+                # #depth image is 1 channel, color is 3 channels
+                # depth_image_3d = np.dstack((depth_image, depth_image, depth_image))
+                # bg_removed = np.where((depth_image_3d > clipping_distance) | \
+                #         (depth_image_3d <= 0), grey_color, color_image)
+
+
+
 
                 # Render images
                 depth_colormap = cv2.applyColorMap(
-                    cv2.convertScaleAbs(depth_image, alpha=0.09), cv2.COLORMAP_JET)
-                images = np.hstack((bg_removed, depth_colormap))
-                cv2.namedWindow('Recorder Realsense', cv2.WINDOW_AUTOSIZE)
+                    cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+                # images = np.hstack((bg_removed, depth_colormap))
+                
+
+                depth_colormap_dim = depth_colormap.shape
+                color_colormap_dim = color_image.shape
+                 # If depth and color resolutions are different, resize color image to match depth image for display
+                if depth_colormap_dim != color_colormap_dim:
+                    resized_color_image = cv2.resize(color_image, dsize=(depth_colormap_dim[1], depth_colormap_dim[0]), interpolation=cv2.INTER_AREA)
+                    images = np.hstack((resized_color_image, depth_colormap))
+                else:
+                    images = np.hstack((color_image, depth_colormap))
+                
+                cv2.namedWindow('Recorder Realsense', cv2.WINDOW_NORMAL)
                 cv2.imshow('Recorder Realsense', images)
                 key = cv2.waitKey(1)
 
