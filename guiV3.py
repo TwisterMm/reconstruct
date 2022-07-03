@@ -8,14 +8,21 @@ from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showinfo, showerror
 from sensors.realsense_helper import get_profiles
 
-import capture
+import pyrealsense2 as rs
 
+
+def isDeviceConnected():
+    ctx = rs.context()
+    devices = ctx.query_devices()
+    if devices:
+        return True
+    else:
+        return False
 
 def btnCapture():
     showinfo(title="Start Scanning",
              message="Please connect intel realsense device, scanning will start taking images")
-    colour_frames, depth_frames = get_profiles()
-    if colour_frames and depth_frames:
+    if(isDeviceConnected()):
         subprocess.run(['python', 'sensors/realsense_recorder.py',
                        '--record_imgs'], text=True, stdout=True)
     else:
@@ -92,7 +99,11 @@ def btnBrowse():
 
 def startViewer():
     try:
-        os.system('python capture.py')
+        if(isDeviceConnected):
+            os.system('python capture.py')
+        else:
+            showerror(title="Camera not available",
+                  message="Please connect intel realsense device before proceed")        
     except RuntimeError:
         pass
 
