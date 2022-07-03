@@ -101,7 +101,7 @@ if __name__ == '__main__':
                 
 
 
-            if key in (27, ord("q")) or cv2.getWindowProperty('RealSense', cv2.WND_PROP_VISIBLE) < 0: 
+            if key in (27, ord("q")) or cv2.getWindowProperty('RealSense', cv2.WND_PROP_VISIBLE) < 1: 
                 cv2.destroyAllWindows()
                 break
             if key == ord("s"):
