@@ -37,10 +37,14 @@ def btnIntegrate():
     print("Integrating...")
     subprocess.run(['python', 'run_system.py', 'config/realsense.json', '--make',
                    '--register', '--refine', '--integrate'], stdout=True, text=True)
+
     old_name = os.path.join("dataset/realsense/scene", "integrated.ply")
-    new_name = os.path.join("dataset/realsense/scene",
-                            "integrated" + str(scan_count-1) + ".ply")
-    os.rename(old_name, new_name)
+    if(old_name.isfile()):
+        new_name = os.path.join("dataset/realsense/scene",
+                                "integrated" + str(scan_count-1) + ".ply")
+        os.rename(old_name, new_name)
+    else:
+        new_name = old_name
     ply_name = "dataset/realsense/scene/integrated" + \
         str(scan_count-1) + ".ply"
     pcd_read = o3d.io.read_point_cloud(ply_name)
