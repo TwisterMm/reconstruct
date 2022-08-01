@@ -39,7 +39,7 @@ def btnIntegrate():
                    '--register', '--refine', '--integrate'], stdout=True, text=True)
 
     old_name = os.path.join("dataset/realsense/scene", "integrated.ply")
-    if(old_name.isfile()):
+    if(os.path.isfile(old_name)):
         new_name = os.path.join("dataset/realsense/scene",
                                 "integrated" + str(scan_count-1) + ".ply")
         os.rename(old_name, new_name)
