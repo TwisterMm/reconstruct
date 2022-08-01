@@ -1,13 +1,17 @@
 from tkinter import Tk, Label, Button, Menu
 import os
+from tkinter import scrolledtext
 import open3d as o3d
 from os.path import exists
 import subprocess
 
 from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showinfo, showerror
+from tkinter.scrolledtext import ScrolledText
+
 from sensors.realsense_helper import get_profiles
 
+import sys
 import pyrealsense2 as rs
 
 
@@ -39,7 +43,7 @@ def btnIntegrate():
                    '--register', '--refine', '--integrate'], stdout=True, text=True)
 
     old_name = os.path.join("dataset/realsense/scene", "integrated.ply")
-    if(old_name.isfile()):
+    if(os.path.isfile(old_name)):
         new_name = os.path.join("dataset/realsense/scene",
                                 "integrated" + str(scan_count-1) + ".ply")
         os.rename(old_name, new_name)
@@ -94,11 +98,12 @@ def btnDelete():
 
 
 def btnBrowse():
-    ply_name = askopenfilename(
-        title="Select file", filetypes=(("PLY Files", "*.ply"),))
-    if ply_name:
-        pcd_read = o3d.io.read_point_cloud(ply_name)
-        o3d.visualization.draw(pcd_read)
+    # ply_name = askopenfilename(
+    #     title="Select file", filetypes=(("PLY Files", "*.ply"),))
+    # if ply_name:
+    #     pcd_read = o3d.io.read_point_cloud(ply_name)
+    #     o3d.visualization.draw(pcd_read)
+    print("hello")
     
 
 def startViewer():
@@ -117,11 +122,23 @@ def aboutInfo():
     showinfo(title="About",
              message="Prototype version V3.0.0\n3D room scanning based on open3D reconstruction system")
 
+class PrintLogger(object):  # create file like object
+    def __init__(self, textbox):  # pass reference to text widget
+        self.textbox = textbox  # keep ref
+    def write(self, text):
+        self.textbox.configure(state="normal")  # make field editable
+        self.textbox.insert("end", text)  # write text to textbox
+        self.textbox.see("end")  # scroll to end
+        self.textbox.configure(state="disabled")  # make field readonly
+    def flush(self):  # needed for file like object
+        pass
+
+
 if __name__ == "__main__":
     root = Tk()
 
     # main window
-    root.geometry('428x268')
+    root.geometry('428x400')
     root.configure(background='#F0F8FF')
     root.title('3D room scanning')
 
@@ -158,6 +175,13 @@ if __name__ == "__main__":
 
     Button(root, text='Exit', bg='#FF4C4C', width=5, height=2, font=(
         'arial', 12, 'normal'), command=root.quit).place(x=310, y=164)
+
+    log_widget = ScrolledText(root, state='disable', font=(
+        'arial', 12, 'normal')).place(x=0, y=250)
+
+    logger = PrintLogger(log_widget)
+    sys.stdout = logger
+    sys.stderr = logger
 
     # drawing the widgets
     root.config(menu=menubar)
