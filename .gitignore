@@ -2,6 +2,7 @@ __pycache__
 
 dataset/
 scripts/
+output/
 
 config/indoor_lidar_rgbd
 config/redwood_objects
