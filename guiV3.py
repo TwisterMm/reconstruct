@@ -9,7 +9,7 @@ from tkinter.messagebox import showinfo, showerror
 from sensors.realsense_helper import get_profiles
 
 import pyrealsense2 as rs
-
+import ctypes
 
 def isDeviceConnected():
     ctx = rs.context()
@@ -29,13 +29,14 @@ def btnCapture():
         showerror(title="Camera not available",
                   message="Please connect intel realsense device before proceed")
 
-
 def btnIntegrate():
     path = "dataset/realsense/scan"
     scan_count = len([f for f in os.listdir(
         path)if os.path.isfile(os.path.join(path, f))])
     print("Integrating...")
-    subprocess.run(['python', 'run_system.py', 'config/realsense.json', '--make',
+    config_path = ply_name = askopenfilename(
+        title="Select file", filetypes=(("json file", "*.json"),),initialdir="config/")
+    subprocess.run(['python', 'run_system.py', f'{config_path}', '--make',
                    '--register', '--refine', '--integrate'], stdout=True, text=True)
 
     old_name = os.path.join("dataset/realsense/scene", "integrated.ply")
@@ -50,7 +51,6 @@ def btnIntegrate():
     pcd_read = o3d.io.read_point_cloud(ply_name)
     o3d.visualization.draw(pcd_read)
     print("File saved to: " + str(new_name))
-
 
 def btnDelete():
     path = "dataset/realsense/scan"
@@ -92,15 +92,13 @@ def btnDelete():
         else:
             print("No scan found, nothing is deleted")
 
-
 def btnBrowse():
     ply_name = askopenfilename(
-        title="Select file", filetypes=(("PLY Files", "*.ply"),))
+        title="Select file", filetypes=(("PLY Files", "*.ply"),), initialdir="dataset/realsense/scene/")
     if ply_name:
         pcd_read = o3d.io.read_point_cloud(ply_name)
         o3d.visualization.draw(pcd_read)
     
-
 def startViewer():
     try:
         if(isDeviceConnected):
@@ -111,17 +109,19 @@ def startViewer():
     except RuntimeError:
         pass
 
-
-
 def aboutInfo():
     showinfo(title="About",
              message="Prototype version V3.0.0\n3D room scanning based on open3D reconstruction system")
 
 if __name__ == "__main__":
+    try: # >= win 8.1
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    except: # win 8.0 or less
+        ctypes.windll.user32.SetProcessDPIAware()
     root = Tk()
 
     # main window
-    root.geometry('428x268')
+    root.geometry('600x400')
     root.configure(background='#F0F8FF')
     root.title('3D room scanning')
 
