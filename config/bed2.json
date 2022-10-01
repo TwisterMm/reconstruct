@@ -1,7 +1,7 @@
 {
     "name": "Realsense L515",
-    "path_dataset": "dataset/realsense",
-    "path_intrinsic": "dataset/realsense/camera_intrinsic.json",
+    "path_dataset": "dataset/bed2",
+    "path_intrinsic": "dataset/bed2/camera_intrinsic.json",
     "max_depth": 5.0,
     "voxel_size": 0.05,
     "max_depth_diff": 0.07,
