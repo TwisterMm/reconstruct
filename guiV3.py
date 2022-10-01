@@ -1,3 +1,4 @@
+import json
 from tkinter import Tk, Label, Button, Menu
 import os
 import open3d as o3d
@@ -30,23 +31,27 @@ def btnCapture():
                   message="Please connect intel realsense device before proceed")
 
 def btnIntegrate():
-    path = "dataset/realsense/scan"
+    
+    config_path = ply_name = askopenfilename(
+        title="Select file", filetypes=(("json file", "*.json"),),initialdir="config/")
+    config = json.load(open(config_path))
+    path = config['path_dataset']
     scan_count = len([f for f in os.listdir(
         path)if os.path.isfile(os.path.join(path, f))])
     print("Integrating...")
-    config_path = ply_name = askopenfilename(
-        title="Select file", filetypes=(("json file", "*.json"),),initialdir="config/")
     subprocess.run(['python', 'run_system.py', f'{config_path}', '--make',
                    '--register', '--refine', '--integrate'], stdout=True, text=True)
-
-    old_name = os.path.join("dataset/realsense/scene", "integrated.ply")
+    # rename integrated file
+    old_name = os.path.join(path + "/scene", "integrated.ply")
     if(os.path.isfile(old_name)):
-        new_name = os.path.join("dataset/realsense/scene",
+        new_name = os.path.join(path + "/scene",
                                 "integrated" + str(scan_count-1) + ".ply")
         os.rename(old_name, new_name)
     else:
         new_name = old_name
-    ply_name = "dataset/realsense/scene/integrated" + \
+
+    # read integrated file
+    ply_name = path + "/scene/integrated" + \
         str(scan_count-1) + ".ply"
     pcd_read = o3d.io.read_point_cloud(ply_name)
     o3d.visualization.draw(pcd_read)
