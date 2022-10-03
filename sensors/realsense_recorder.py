@@ -150,16 +150,16 @@ if __name__ == "__main__":
             # note: using 640 x 480 depth resolution produces smooth depth boundaries
             #       using rs.format.bgr8 for color image format for OpenCV based image visualization
             print('Using the default profiles: \n  color:{}, depth:{}'.format(
-                color_profiles[0], depth_profiles[0]))
+                color_profiles[4], depth_profiles[0]))
             w, h, fps, fmt = depth_profiles[0]
             config.enable_stream(rs.stream.depth, w, h, fmt, fps)
-            w, h, fps, fmt = color_profiles[0]
+            w, h, fps, fmt = color_profiles[4]
             config.enable_stream(rs.stream.color, w, h, fmt, fps)
             if args.record_rosbag:
                 config.enable_record_to_file(path_bag)
         if args.playback_rosbag:
             config.enable_device_from_file(path_bag, repeat_playback=True)
-
+    
         # Start streaming
         profile = pipeline.start(config)
         depth_sensor = profile.get_device().first_depth_sensor()
@@ -182,10 +182,9 @@ if __name__ == "__main__":
         align_to = rs.stream.color
         align = rs.align(align_to)
 
-        # Streaming loop
-        path = 'dataset/realsense/color'
+        
         # current_path = os.path.join(os.getcwd(), path)
-        frame_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
+        frame_count = len([f for f in os.listdir(path_color)if os.path.isfile(os.path.join(path_color, f))])
         start_frame = str(frame_count).zfill(6)        
         
         try:
@@ -250,10 +249,10 @@ if __name__ == "__main__":
 
                 # if 'esc' button pressed, escape loop and exit program
                 if key == 27 or cv2.getWindowProperty('Recorder Realsense', cv2.WND_PROP_VISIBLE) < 1:                    
-                    path = "dataset/realsense/scan"                   
+                    path = path_scan                
                     scan_count = len([f for f in os.listdir(path)if os.path.isfile(os.path.join(path, f))])
                     end_frame = str(frame_count).zfill(6)
-                    text_file = open("dataset/realsense/scan/scan" + str(scan_count) + ".txt", "w")
+                    text_file = open(path +"/scan" + str(scan_count) + ".txt", "w")
                     text_file.write((start_frame) + "\n" + (end_frame))
                     text_file.close()
                     cv2.destroyAllWindows()
