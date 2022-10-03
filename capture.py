@@ -1,7 +1,12 @@
 import cv2
 import numpy as np
 import pyrealsense2 as rs
+from os import makedirs
+from os.path import exists
 
+def make_clean_folder(path_folder):
+    if not exists(path_folder):
+        makedirs(path_folder)
 
 if __name__ == '__main__':
     # Configure depth and color streams
@@ -105,7 +110,7 @@ if __name__ == '__main__':
                 cv2.destroyAllWindows()
                 break
             if key == ord("s"):
-                
+                make_clean_folder('output')
                 # colorized = colorizer.process(aligned_frames)    
 
                 cv2.imwrite('output/img%d.png' %n, color_image)
