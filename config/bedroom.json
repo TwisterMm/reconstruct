@@ -4,7 +4,7 @@
     "path_intrinsic": "dataset/bedroom/camera_intrinsic.json",
     "max_depth": 5.0,
     "voxel_size": 0.05,
-    "max_depth_diff": 0.10,
+    "max_depth_diff": 0.08,
     "preference_loop_closure_odometry": 0.1,
     "preference_loop_closure_registration": 5.0,
     "tsdf_cubic_size": 3.0,
