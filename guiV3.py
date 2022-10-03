@@ -28,7 +28,7 @@ def btnCapture():
                        '--record_imgs'], text=True, stdout=True)
     else:
         showerror(title="Camera not available",
-                  message="Please connect intel realsense device before proceed")
+                  message="Please connect to intel realsense device before proceed")
 
 def btnIntegrate():
     
