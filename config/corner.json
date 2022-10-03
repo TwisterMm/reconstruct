@@ -1,7 +1,7 @@
 {
     "name": "Realsense L515",
-    "path_dataset": "dataset/bed2",
-    "path_intrinsic": "dataset/bed2/camera_intrinsic.json",
+    "path_dataset": "dataset/master",
+    "path_intrinsic": "dataset/master/camera_intrinsic.json",
     "max_depth": 5.0,
     "voxel_size": 0.05,
     "max_depth_diff": 0.07,
@@ -10,6 +10,6 @@
     "tsdf_cubic_size": 3.0,
     "icp_method": "color",
     "global_registration": "ransac",
-    "python_multi_threading": true,
-    "n_frames_per_fragment": 10
+    "python_multi_threading": true
+    
 }
