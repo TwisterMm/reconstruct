@@ -31,31 +31,33 @@ def btnCapture():
                   message="Please connect to intel realsense device before proceed")
 
 def btnIntegrate():
-    
-    config_path = ply_name = askopenfilename(
-        title="Select file", filetypes=(("json file", "*.json"),),initialdir="config/")
-    config = json.load(open(config_path))
-    path = config['path_dataset']
-    scan_count = len([f for f in os.listdir(
-        path)if os.path.isfile(os.path.join(path, f))])
-    print("Integrating...")
-    subprocess.run(['python', 'run_system.py', f'{config_path}', '--make',
-                   '--register', '--refine', '--integrate'], stdout=True, text=True)
-    # rename integrated file
-    old_name = os.path.join(path + "/scene", "integrated.ply")
-    if(os.path.isfile(old_name)):
-        new_name = os.path.join(path + "/scene",
-                                "integrated" + str(scan_count-1) + ".ply")
-        os.rename(old_name, new_name)
-    else:
-        new_name = old_name
+    try:
+        config_path = ply_name = askopenfilename(
+            title="Select file", filetypes=(("json file", "*.json"),),initialdir="config/")
+        config = json.load(open(config_path))
+        path = config['path_dataset']
+        scan_count = len([f for f in os.listdir(
+            path)if os.path.isfile(os.path.join(path, f))])        
+        subprocess.run(['python', 'run_system.py', f'{config_path}', '--make',
+                    '--register', '--refine', '--integrate'], stdout=True, text=True)
+        old_name = os.path.join(path + "/scene", "integrated.ply")
+        if(os.path.isfile(old_name)):
+            new_name = os.path.join(path + "/scene",
+                                    "integrated" + str(scan_count-1) + ".ply")
+            os.rename(old_name, new_name)
+        else:
+            new_name = old_name
 
-    # read integrated file
-    ply_name = path + "/scene/integrated" + \
-        str(scan_count-1) + ".ply"
-    pcd_read = o3d.io.read_point_cloud(ply_name)
-    o3d.visualization.draw(pcd_read)
-    print("File saved to: " + str(new_name))
+        # read integrated file
+        ply_name = path + "/scene/integrated" + \
+            str(scan_count-1) + ".ply"
+        pcd_read = o3d.io.read_point_cloud(ply_name)
+        o3d.visualization.draw(pcd_read)
+    except FileNotFoundError:
+        showerror(title="File not found",
+                  message="Please select a config file before proceed")
+    # rename integrated file
+    
 
 def btnDelete():
     path = "dataset/realsense/scan"
