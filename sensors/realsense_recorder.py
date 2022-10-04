@@ -142,19 +142,31 @@ if __name__ == "__main__":
     #  different resolutions of color and depth streams
     config = rs.config()
 
-    color_profiles, depth_profiles = get_profiles()
+    color_profiles, depth_profiles, product_line = get_profiles()
+
+    
 
     #if camera is plugged in (color_profiles and depth_profiles are not)
     if color_profiles and depth_profiles:
         if args.record_imgs or args.record_rosbag:
             # note: using 640 x 480 depth resolution produces smooth depth boundaries
             #       using rs.format.bgr8 for color image format for OpenCV based image visualization
-            print('Using the default profiles: \n  color:{}, depth:{}'.format(
-                color_profiles[4], depth_profiles[0]))
-            w, h, fps, fmt = depth_profiles[0]
-            config.enable_stream(rs.stream.depth, w, h, fmt, fps)
-            w, h, fps, fmt = color_profiles[4]
-            config.enable_stream(rs.stream.color, w, h, fmt, fps)
+            if product_line == 'L500':
+                print('Using the default profiles: \n  color:{}, depth:{}'.format(
+                    color_profiles[4], depth_profiles[0]))
+                w, h, fps, fmt = depth_profiles[0]
+                config.enable_stream(rs.stream.depth, w, h, fmt, fps)
+                w, h, fps, fmt = color_profiles[4]
+                config.enable_stream(rs.stream.color, w, h, fmt, fps)
+            elif product_line == 'D400':
+                print('Using the default profiles: \n  color:{}, depth:{}'.format(
+                    color_profiles[5], depth_profiles[0]))
+                w, h, fps, fmt = depth_profiles[0]
+                config.enable_stream(rs.stream.depth, w, h, fmt, fps)
+                w, h, fps, fmt = color_profiles[5]
+                config.enable_stream(rs.stream.color, w, h, fmt, fps)
+
+
             if args.record_rosbag:
                 config.enable_record_to_file(path_bag)
         if args.playback_rosbag:
@@ -163,6 +175,12 @@ if __name__ == "__main__":
         # Start streaming
         profile = pipeline.start(config)
         depth_sensor = profile.get_device().first_depth_sensor()
+
+        # # Declare sensor object and set options
+        # depth_sensor.set_option(rs.option.visual_preset, 3) # 5 is short range, 3 is low ambient light
+        # depth_sensor.set_option(rs.option.confidence_threshold, 3) # 3 is the highest confidence
+        # depth_sensor.set_option(rs.option.noise_filtering, 5)
+        
 
         # Using preset HighAccuracy for recording
         if args.record_rosbag or args.record_imgs:
@@ -181,6 +199,8 @@ if __name__ == "__main__":
         # The "align_to" is the stream type to which we plan to align depth frames.
         align_to = rs.stream.color
         align = rs.align(align_to)
+
+        
 
         
         # current_path = os.path.join(os.getcwd(), path)

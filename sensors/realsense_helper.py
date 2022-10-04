@@ -40,6 +40,7 @@ def get_profiles():
     for device in devices:
         name = device.get_info(rs.camera_info.name)
         serial = device.get_info(rs.camera_info.serial_number)
+        product_line = device.get_info(rs.camera_info.product_line)
         print('Sensor: {}, {}'.format(name, serial))
         print('Supported video formats:')
         for sensor in device.query_sensors():
@@ -60,4 +61,4 @@ def get_profiles():
                     else:
                         depth_profiles.append((w, h, fps, fmt))
 
-    return color_profiles, depth_profiles
+    return color_profiles, depth_profiles, product_line
