@@ -1,0 +1,15 @@
+{
+    "name": "Realsense L515",
+    "path_dataset": "dataset/realsense",
+    "path_intrinsic": "dataset/realsense/camera_intrinsic.json",
+    "max_depth": 6.0,
+    "voxel_size": 0.05,
+    "max_depth_diff": 0.08,
+    "preference_loop_closure_odometry": 0.1,
+    "preference_loop_closure_registration": 5.0,
+    "tsdf_cubic_size": 3.5,
+    "icp_method": "color",
+    "global_registration": "ransac",
+    "python_multi_threading": true
+    
+}
