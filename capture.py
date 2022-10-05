@@ -10,6 +10,8 @@ def make_clean_folder(path_folder):
 
 if __name__ == '__main__':
     # Configure depth and color streams
+    make_clean_folder('output/color')
+    make_clean_folder('output/depth')
     pipeline = rs.pipeline()
     config = rs.config()
 
@@ -109,11 +111,16 @@ if __name__ == '__main__':
             if key in (27, ord("q")) or cv2.getWindowProperty('RealSense', cv2.WND_PROP_VISIBLE) < 1: 
                 cv2.destroyAllWindows()
                 break
-            if key == ord("s"):
-                make_clean_folder('output')
-                # colorized = colorizer.process(aligned_frames)    
 
-                cv2.imwrite('output/img%d.png' %n, color_image)
+
+
+            if key == ord("s"):             
+                # colorized = colorizer.process(aligned_frames)   
+
+                cv2.imwrite("output/%s/%06d.png" % \
+                            ('color', n), color_image)
+                cv2.imwrite("output/%s/%06d.png" % \
+                            ('depth', n), depth_image)
                 # Create save_to_ply object
                 ply = rs.save_to_ply("output/out%d.ply" %n)
             
@@ -122,9 +129,9 @@ if __name__ == '__main__':
                 ply.set_option(rs.save_to_ply.option_ply_binary, False)
                 ply.set_option(rs.save_to_ply.option_ply_normals, True)
                 ply.process(aligned_frames)
-                print("saving pointcloud out%d and image img%d" %(n,n))          
+                print("saving image and depth frame %06d, pointcloud out%d " %(n,n))          
                 n = n +1
-
+            
 
     finally:
 
