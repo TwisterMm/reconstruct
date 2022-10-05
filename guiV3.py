@@ -55,7 +55,7 @@ def btnIntegrate():
         o3d.visualization.draw(pcd_read)
     except FileNotFoundError:
         showerror(title="File not found",
-                  message="Please select a config file before proceed")
+                  message="Make sure the path contains the dataset")
     # rename integrated file
     
 
