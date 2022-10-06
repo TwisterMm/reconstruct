@@ -3,10 +3,28 @@ import numpy as np
 import pyrealsense2 as rs
 from os import makedirs
 from os.path import exists
+import json
 
 def make_clean_folder(path_folder):
     if not exists(path_folder):
         makedirs(path_folder)
+
+def save_intrinsic_as_json(filename, frame):
+    intrinsics = frame.profile.as_video_stream_profile().intrinsics
+    with open(filename, 'w') as outfile:
+        obj = json.dump(
+            {
+                'width':
+                    intrinsics.width,
+                'height':
+                    intrinsics.height,
+                'intrinsic_matrix': [
+                    intrinsics.fx, 0, 0, 0, intrinsics.fy, 0, intrinsics.ppx,
+                    intrinsics.ppy, 1
+                ]
+            },
+            outfile,
+            indent=4)
 
 if __name__ == '__main__':
     # Configure depth and color streams
@@ -113,7 +131,6 @@ if __name__ == '__main__':
                 break
 
 
-
             if key == ord("s"):             
                 # colorized = colorizer.process(aligned_frames)   
 
@@ -121,6 +138,11 @@ if __name__ == '__main__':
                             ('color', n), color_image)
                 cv2.imwrite("output/%s/%06d.png" % \
                             ('depth', n), depth_image)
+                
+                print("saving image and depth frame %06d" %(n,n))          
+                n = n +1
+
+            if key == ord("t"):
                 # Create save_to_ply object
                 ply = rs.save_to_ply("output/out%d.ply" %n)
             
@@ -129,11 +151,11 @@ if __name__ == '__main__':
                 ply.set_option(rs.save_to_ply.option_ply_binary, False)
                 ply.set_option(rs.save_to_ply.option_ply_normals, True)
                 ply.process(aligned_frames)
-                print("saving image and depth frame %06d, pointcloud out%d " %(n,n))          
-                n = n +1
+                print("saving ply %06d" %n)
             
 
     finally:
 
         # Stop streaming
         pipeline.stop()
+        save_intrinsic_as_json("output/camera_intrinsic.json", color_frame)
