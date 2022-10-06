@@ -139,7 +139,7 @@ if __name__ == '__main__':
                 cv2.imwrite("output/%s/%06d.png" % \
                             ('depth', n), depth_image)
                 
-                print("saving image and depth frame %06d" %(n,n))          
+                print("saving image and depth frame %06d" %n)          
                 n = n +1
 
             if key == ord("t"):
